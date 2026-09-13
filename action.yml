@@ -1,0 +1,31 @@
+name: 'ESO Addon README Badge Check'
+description: 'Checks (and can auto-fix) shields.io version/API badges in your GitHub README against your addon manifest.'
+author: 'MPHONlC'
+branding:
+  icon: 'tag'
+  color: 'blue'
+
+inputs:
+  readme_file:
+    description: 'Path to the GitHub-flavored markdown README containing the badges'
+    required: false
+    default: 'README.md'
+  manifest_file:
+    description: 'Path to the .addon manifest to compare against'
+    required: true
+  fix:
+    description: 'If true, rewrite stale badge values in place instead of just failing the check'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check README badge freshness
+      shell: bash
+      run: |
+        ARGS=(--readme-file "${{ inputs.readme_file }}" --manifest-file "${{ inputs.manifest_file }}")
+        if [ "${{ inputs.fix }}" == "true" ]; then
+          ARGS+=(--fix)
+        fi
+        python3 "${{ github.action_path }}/check_readme_badges.py" "${ARGS[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
